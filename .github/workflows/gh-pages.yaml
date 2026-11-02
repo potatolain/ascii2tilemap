@@ -65,6 +65,10 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        name: Install ldid to sign mac binary
+      - uses: MOZGIII/install-ldid-action@v1
+        with:
+          tag: v2.1.5-procursus7
       - name: Upload Exporter Binary Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
