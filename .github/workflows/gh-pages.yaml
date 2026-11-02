@@ -43,9 +43,9 @@ jobs:
       - name: Build pkg binaries
         run: cd exporter && sh build-pkg.sh && cd ..
       - name: Read version and name from package.json
-        id: package_info
+        id: pkgjson
         run: |
-          VERSION=$(node -e "console.info(require('./package.json').version)")
+          VERSION=$(node -e "console.info('ascii2retro Exporter', require('./package.json').version)")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   deploy:
@@ -71,8 +71,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "Exporter ${{ steps.package_info.outputs.version }}"
           prerelease: false
-          title: "Automatic build ${{ steps.package_info.outputs.version }}"
+          title: ${{ steps.package_info.outputs.version }}
           files: |
-            exporter/bin/*
+            /home/runner/work/ascii2retro/ascii2retro/exporter/bin/*
