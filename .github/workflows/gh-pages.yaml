@@ -29,7 +29,7 @@ jobs:
       - name: Install build tool
         run: npm install @yao-pkg/pkg
       - name: Bump version
-        run: npm version patch
+        run: npm --no-git-tag-version version patch
       - name: Build
         run: npm run build
       - name: Upload static files as artifact
