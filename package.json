@@ -1,6 +1,6 @@
 {
   "name": "ascii2retro",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Create and convert ascii art to be used with retro consoles, or other things needing binary output",
   "repository": {
     "type": "git",
