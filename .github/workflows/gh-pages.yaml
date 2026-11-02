@@ -67,11 +67,12 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Upload Exporter Binary Release
+      - name: Upload Exporter Binary Releas
+        automatic_release_tag: ${{ steps.pkgjson.outputs.version }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          title: ${{ steps.package_info.outputs.version }}
+          title: ${{ steps.pkgjson.outputs.version }}
           files: |
             /home/runner/work/ascii2retro/ascii2retro/exporter/bin/*
