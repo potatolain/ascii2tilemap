@@ -38,8 +38,12 @@ jobs:
         with:
           path: build/
 
+      - name: Install ldid to sign mac binary
+        uses: MOZGIII/install-ldid-action@v1
+        with:
+          tag: v2.1.5-procursus7
       - name: Build pkg binaries
-        run: cd exporter && sh build-pkg.sh
+        run: cd exporter && sh build-pkg.sh && cd ..
       - name: Read version and name from package.json
         id: package_info
         run: |
@@ -65,16 +69,12 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Install ldid to sign mac binary
-        uses: MOZGIII/install-ldid-action@v1
-        with:
-          tag: v2.1.5-procursus7
       - name: Upload Exporter Binary Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "Exporter ${{ steps.package_info.outputs.version }}"
-          prerelease: true
+          prerelease: false
           title: "Automatic build ${{ steps.package_info.outputs.version }}"
           files: |
             exporter/bin/*
