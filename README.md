@@ -1,6 +1,6 @@
 # ascii2retro
 
-[<img alt="preview" src="assets/preview.png" style="width: 800px;" />](https://ascii2retro.nes.science)
+[<img width="800" alt="preview" src="https://github.com/user-attachments/assets/cf90180b-f9c3-4e4e-b8eb-d2c9c6d520b8" />](https://ascii2retro.nes.science)
 
 [Try it out!](https://ascii2retro.nes.science)
 
