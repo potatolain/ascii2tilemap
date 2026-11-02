@@ -71,8 +71,8 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ steps.pkgjson.outputs.version }}
+          automatic_release_tag: ${{ steps.deployment.pkgjson.outputs.version }}
           prerelease: false
-          title: ${{ steps.pkgjson.outputs.version }}
+          title: ${{ steps.deployment.pkgjson.outputs.version }}
           files: |
             /home/runner/work/ascii2retro/ascii2retro/exporter/bin/*
