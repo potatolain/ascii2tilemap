@@ -1,9 +1,9 @@
 // Quick command line tool for handling exports using the project's code.
 // Compiled to binary using @yao-pkg/pkg (modern fork)
 
-import { knownExportTypes, loadFromText, exportAs } from "../src/fileUtils.js";
+const { knownExportTypes, loadFromText, exportAs } = require("../src/fileUtils.js");
 
-import fs from "fs";
+const fs = require("fs");
 
 function out() {
   console.info("[ascii2retro] [info]", ...arguments);
