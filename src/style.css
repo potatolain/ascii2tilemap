@@ -184,4 +184,13 @@ details.dropdown ul li {
 article.footer {
   text-align: center;
   margin: auto;
+  position: relative;
+}
+
+small.version {
+  color: slategray;
+  margin: auto;
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
 }

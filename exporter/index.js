@@ -1,4 +1,5 @@
 // Quick command line tool for handling exports using the project's code.
+// Compiled to binary using @yao-pkg/pkg (modern fork)
 
 import { knownExportTypes, loadFromText, exportAs } from "../src/fileUtils.js";
 

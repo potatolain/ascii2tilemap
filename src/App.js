@@ -14,6 +14,7 @@ import {
 } from "./constants.js";
 import { downloadFile } from "./webUtils.js";
 import ResizeDialog from "./ResizeDialog.js";
+import pkgJson from "../package.json";
 
 function buildDefaultData() {
   const data = [];
@@ -602,6 +603,7 @@ export default function Main() {
       <article className="footer container">
         Created in 2026 by Sarah Parker <br />
         <a href="https://igwgames.com">Homepage</a> &bull; <a href="https://gh.nes.science/ascii2retro">Source code</a>
+        <small class="version">Version {pkgJson.version}</small>
       </article>
     </>
   );
