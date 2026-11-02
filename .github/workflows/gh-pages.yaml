@@ -17,6 +17,8 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
+    outputs:
+      version: "${{ steps.pkgjson.outputs.version }}"
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -45,7 +47,7 @@ jobs:
       - name: Read version and name from package.json
         id: pkgjson
         run: |
-          VERSION=$(node -e "console.info('ascii2retro Exporter', require('./package.json').version)")
+          VERSION=$(jq -r '.version' package.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   deploy:
@@ -71,8 +73,8 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ steps.deployment.pkgjson.outputs.version }}
+          automatic_release_tag: v${{ steps.deployment.outputs.version }}
           prerelease: false
-          title: ${{ steps.deployment.pkgjson.outputs.version }}
+          title: Exporter Release ${{ steps.deployment.outputs.version }}
           files: |
             /home/runner/work/ascii2retro/ascii2retro/exporter/bin/*
