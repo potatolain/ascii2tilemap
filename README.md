@@ -67,6 +67,25 @@ value in `ASCII Offset`. If a character is not in this section, or it appears in
 
 The value can be an integer, as well as a hex value (prefixed with `0x` or `$`) or a binary value (prefixed with `0b` or `%`).
 
+## Export Tool
+
+A binary version of the export feature is attached to this project in the releases section. You can use
+this to turn saved txt file exports into whatever format in your build process.
+
+Use it by downloading the binary for your platform, then on the command line, do:
+
+```
+./ascii2retro [output type] [path/to/input-file.txt] [path/to/save/to]
+```
+
+Example:
+
+```
+ ./ascii2retro json myfile.txt myfile.json
+```
+
+Note macos binaries are untested and experimental! Create a bug with detail if you need help with them.
+
 ## License
 
 MIT License! Do what you want with this. And if you find this useful or make something cool, let me know! Knowing people
