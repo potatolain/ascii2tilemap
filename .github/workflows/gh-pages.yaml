@@ -42,7 +42,7 @@ jobs:
         with:
           tag: v2.1.5-procursus7
       - name: Build pkg binaries
-        run: cd exporter && sh build-pkg.sh && cd ..
+        run: sh build-exporter-bin.sh
       - name: Read version and name from package.json
         id: pkgjson
         run: |
