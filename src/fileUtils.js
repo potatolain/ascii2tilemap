@@ -319,7 +319,7 @@ export function exportAs(exportType, { name, width, height, outputSize, data, tr
 #define ${slugNameUpper}_HEIGHT ${height}
 #define ${slugNameUpper}_OUTPUT_SIZE ${outputSize}
 #define ${slugNameUpper}_ASCII_OFFSET ${parsedAsciiOffset}
-const unsigned ${dataType} ${slugName}[] = {
+const ${dataType} ${slugName}[] = {
     ${chunkArray(rawData, 16)
       .map((n) => n.join(", "))
       .join(",\n    ")}
