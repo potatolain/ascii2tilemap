@@ -209,7 +209,7 @@ describe("exportAs", () => {
   });
 
   it("c export", () => {
-    const expectedC = `#define ART_WIDTH 8
+    const expectedC = `#define SMILEY_FACE_WIDTH 8
 #define SMILEY_FACE_HEIGHT 9
 #define SMILEY_FACE_OUTPUT_SIZE 8
 #define SMILEY_FACE_ASCII_OFFSET 0
@@ -290,7 +290,7 @@ describe("exportTextFile", () => {
   });
 
   it("c export", () => {
-    const expectedC = `#define ART_WIDTH 8
+    const expectedC = `#define SMILEY_FACE_WIDTH 8
 #define SMILEY_FACE_HEIGHT 9
 #define SMILEY_FACE_OUTPUT_SIZE 8
 #define SMILEY_FACE_ASCII_OFFSET 0

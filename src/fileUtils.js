@@ -303,11 +303,23 @@ export function exportAs(exportType, { name, width, height, outputSize, data, tr
     case "c":
       const slugName = slugify(name),
         slugNameUpper = slugName.toUpperCase();
-      return `#define ART_WIDTH ${width}
+      let dataType = "unsigned char";
+      switch (outputSize) {
+        case 16:
+          dataType = "unsigned int";
+          break;
+        case 32:
+          dataType = "unsigned long";
+          break;
+        case 64:
+          dataType = "unsigned long long";
+          break;
+      }
+      return `#define ${slugNameUpper}_WIDTH ${width}
 #define ${slugNameUpper}_HEIGHT ${height}
 #define ${slugNameUpper}_OUTPUT_SIZE ${outputSize}
 #define ${slugNameUpper}_ASCII_OFFSET ${parsedAsciiOffset}
-const unsigned char ${slugName}[] = {
+const unsigned ${dataType} ${slugName}[] = {
     ${chunkArray(rawData, 16)
       .map((n) => n.join(", "))
       .join(",\n    ")}
