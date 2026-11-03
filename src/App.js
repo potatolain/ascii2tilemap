@@ -432,9 +432,13 @@ export default function Main() {
       <div className="container">
         <h1>ascii2tilemap</h1>
         <div className="project-description">
-          A little tool to help you create graphics for your retro and retro-styled games in the simplest way possible!
-          Draw something with text, then create binary. Or, use the generated text to convert it yourself using our
-          tools!
+          A little tool to help you create tilemaps for your retro and retro-styled games in the simplest way possible!
+          Draw something with text, then export to binary/code. Or, use the generated text to convert it yourself using
+          the{" "}
+          <a href="http://gh.nes.science/ascii2tilemap/releases" target="_blank">
+            tools on Github
+          </a>
+          !
         </div>
         <fieldset role="group">
           <label htmlFor="pname">Project name </label>
