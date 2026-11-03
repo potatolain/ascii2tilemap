@@ -13,9 +13,9 @@ export default function ToolSelector({ activeTool, setActiveTool, activeDrawChar
           </fieldset>
         </div>
       </div>
-      <div className={`tool ${activeTool === "select" ? "active" : ""}`} onClick={() => setActiveTool("select")}>
+      {/*<div className={`tool ${activeTool === "select" ? "active" : ""}`} onClick={() => setActiveTool("select")}>
         <div className="name">Select</div>
-      </div>
+      </div>*/}
       <div className={`tool ${activeTool === "box" ? "active" : ""}`} onClick={() => setActiveTool("box")}>
         <div className="name">Box</div>
         <div className="settings">
