@@ -310,7 +310,7 @@ export function exportAs(exportType, { name, width, height, outputSize, data, tr
 const unsigned char ${slugName}[] = {
     ${chunkArray(rawData, 16)
       .map((n) => n.join(", "))
-      .join(",\n    ")};
+      .join(",\n    ")}
 };`;
     case "csv":
       return rawData.join(",");
