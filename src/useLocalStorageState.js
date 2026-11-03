@@ -1,6 +1,6 @@
 import { useState } from "react";
 // useState wrapped in localStorage. Pretty simple
-const prefix = "ascii2retro.";
+const prefix = "ascii2tilemap.";
 export default function useLocalStorageState(key, defaultVal) {
   let myValue = defaultVal;
   let lsVal = localStorage.getItem(`${prefix}${key}`);

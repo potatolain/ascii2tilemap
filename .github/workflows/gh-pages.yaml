@@ -56,7 +56,7 @@ jobs:
           prerelease: false
           title: Exporter Release ${{ steps.pkgjson.outputs.version }}
           files: |
-            /home/runner/work/ascii2retro/ascii2retro/exporter/bin/*
+            /home/runner/work/ascii2tilemap/ascii2tilemap/exporter/bin/*
   deploy:
     needs: build
 

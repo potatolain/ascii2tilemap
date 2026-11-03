@@ -1,10 +1,10 @@
-# ascii2retro
+# ascii2tilemap
 
-[<img width="800" alt="preview" src="https://github.com/user-attachments/assets/cf90180b-f9c3-4e4e-b8eb-d2c9c6d520b8" />](https://ascii2retro.nes.science)
+[<img width="800" alt="preview" src="https://github.com/user-attachments/assets/cf90180b-f9c3-4e4e-b8eb-d2c9c6d520b8" />](https://ascii2tilemap.nes.science)
 
-[Try it out!](https://ascii2retro.nes.science)
+[Try it out!](https://ascii2tilemap.nes.science)
 
-ascii2retro is a quick simple way to make layouts/nametables/UIs for your retro games. The idea is simple, create ascii/unicode art,
+ascii2tilemap is a quick simple way to make layouts/nametables/UIs for your retro games. The idea is simple, create ascii/unicode art,
 then convert it to an image you can use. The format is fairly simple, so you can also create your own art and upload it to use the
 conversion. Finally, the converter is provided as a standalone script/binary, should you want to use this in your own build pipelines.
 
@@ -75,13 +75,13 @@ this to turn saved txt file exports into whatever format in your build process.
 Use it by downloading the binary for your platform, then on the command line, do:
 
 ```
-./ascii2retro [output type] [path/to/input-file.txt] [path/to/save/to]
+./ascii2tilemap [output type] [path/to/input-file.txt] [path/to/save/to]
 ```
 
 Example:
 
 ```
- ./ascii2retro json myfile.txt myfile.json
+ ./ascii2tilemap json myfile.txt myfile.json
 ```
 
 Note macos binaries are untested and experimental! Create a bug with detail if you need help with them.

@@ -6,15 +6,15 @@ const { knownExportTypes, loadFromText, exportAs } = require("../src/fileUtils.j
 const fs = require("fs");
 
 function out() {
-  console.info("[ascii2retro] [info]", ...arguments);
+  console.info("[ascii2tilemap] [info]", ...arguments);
 }
 function error() {
-  console.info("[ascii2retro] [error]", ...arguments);
+  console.info("[ascii2tilemap] [error]", ...arguments);
 }
 
 function printUsage() {
-  out("Usage: ascii2retro [output type] [path/to/input-file.txt] [path/to/save/to]");
-  out("Example: ./ascii2retro json myfile.txt myfile.json");
+  out("Usage: ascii2tilemap [output type] [path/to/input-file.txt] [path/to/save/to]");
+  out("Example: ./ascii2tilemap json myfile.txt myfile.json");
   out("Available export types: " + knownExportTypes.join(", "));
 }
 

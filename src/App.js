@@ -430,7 +430,7 @@ export default function Main() {
         <></>
       )}
       <div className="container">
-        <h1>ascii2retro</h1>
+        <h1>ascii2tilemap</h1>
         <div className="project-description">
           A little tool to help you create graphics for your retro and retro-styled games in the simplest way possible!
           Draw something with text, then create binary. Or, use the generated text to convert it yourself using our
@@ -602,7 +602,8 @@ export default function Main() {
       </div>
       <article className="footer container">
         Created in 2026 by Sarah Parker <br />
-        <a href="https://igwgames.com">Homepage</a> &bull; <a href="https://gh.nes.science/ascii2retro">Source code</a>
+        <a href="https://igwgames.com">Homepage</a> &bull;{" "}
+        <a href="https://gh.nes.science/ascii2tilemap">Source code</a>
         <small class="version">Version {pkgJson.version}</small>
       </article>
     </>

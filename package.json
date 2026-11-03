@@ -1,10 +1,10 @@
 {
-  "name": "ascii2retro",
-  "version": "1.0.8",
+  "name": "ascii2tilemap",
+  "version": "1.0.9",
   "description": "Create and convert ascii art to be used with retro consoles, or other things needing binary output",
   "repository": {
     "type": "git",
-    "url": "https://gh.nes.science/ascii2retro"
+    "url": "https://gh.nes.science/ascii2tilemap"
   },
   "license": "MIT",
   "author": "Sarah Parker",
