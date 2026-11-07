@@ -306,7 +306,7 @@ export function exportAs(exportType, { name, width, height, outputSize, data, tr
       let dataType = "unsigned char";
       switch (outputSize) {
         case 16:
-          dataType = "unsigned int";
+          dataType = "unsigned short";
           break;
         case 32:
           dataType = "unsigned long";
