@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ToolSelector from "./ToolSelector.js";
 import ExtraCharacterTable from "./ExtaCharacterTable.js";
 import InfoDialog from "./InfoDialog.js";
@@ -28,8 +28,11 @@ function buildDefaultData() {
 }
 
 function getCharacterPosition(event) {
-  const editorRect = event.target.closest(".editor-wrap").getBoundingClientRect(),
-    eventX = event.clientX - editorRect.left - 4,
+  const editorRect = event.target.closest(".editor-wrap")?.getBoundingClientRect();
+  if (!editorRect) {
+    return { charX: null, charY: null, eventX: null, eventY: null };
+  }
+  const eventX = event.clientX - editorRect.left - 4,
     eventY = event.clientY - editorRect.top - 4,
     charX = Math.floor(eventX / CHAR_SIZE_W_BORDER_PX_X),
     charY = Math.floor(eventY / CHAR_SIZE_W_BORDER_PX_Y);
@@ -90,6 +93,17 @@ function rebuildArray(arr, width, height) {
   return newArray;
 }
 
+// Track where the mouse is for some animation affects that
+// we don't want to tie to state updates.
+function movePasteDiv(event) {
+  const pasteDiv = document.getElementById("paste-div");
+  if (!pasteDiv) {
+    return;
+  }
+  pasteDiv.style.top = `${event.pageY}px`;
+  pasteDiv.style.left = `${event.pageX}px`;
+}
+
 export default function Main() {
   const [name, setNameRaw] = useLocalStorageState("name");
   const [nameValid, setNameValid] = useState(true);
@@ -98,10 +112,11 @@ export default function Main() {
   const [data, setData] = useLocalStorageState("drawingdata", buildDefaultData());
   const [outputSize, setOutputSize] = useLocalStorageState("outputSize", 8);
   const [asciiOffset, setAsciiOffset] = useLocalStorageState("asciiOffset", "0");
-  const [activeTool, setActiveTool] = useLocalStorageState("activeTool", TOOL_TYPES[0]);
+  const [activeTool, setActiveToolData] = useLocalStorageState("activeTool", TOOL_TYPES[0]);
   const [activeTileX, setActiveTileX] = useState(null);
   const [activeTileY, setActiveTileY] = useState(null);
-  const [boxPosTLXY, setboxPosTLXY] = useState(null);
+  const [activeToolStartXY, setActiveToolStartXY] = useState(null);
+  const [activeToolEndXY, setActiveToolEndXY] = useState(null);
   const [activeDrawCharacter, setActiveDrawCharacter] = useState("x");
   const [mouseIsDown, setMouseIsDown] = useState(false);
   const [boxStyle, setBoxStyle] = useState("Default");
@@ -110,14 +125,25 @@ export default function Main() {
   const [translationsDebounce, setTranslationsDebounce] = useState(true);
   const [showResizeDialog, setShowResizeDialog] = useState(false);
   const [currentDialog, setCurrentDialog] = useState({});
+  const [currentPaste, setCurrentPaste] = useState(null);
+
+  const pasteDiv = useRef(null);
 
   const asciiOffsetParsed = parseTextToBinary(asciiOffset, outputSize) || 0;
   useEffect(() => {
     window.addEventListener("mouseup", onReleaseEditor);
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("cut", onCut);
+    window.addEventListener("copy", onCopy);
+    window.addEventListener("paste", onPaste);
+    window.addEventListener("mousemove", movePasteDiv);
     return () => {
       window.removeEventListener("mouseup", onReleaseEditor);
       window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("cut", onCut);
+      window.removeEventListener("copy", onCopy);
+      window.removeEventListener("paste", onPaste);
+      window.removeEventListener("mousemove", movePasteDiv);
     };
   });
 
@@ -191,6 +217,7 @@ export default function Main() {
           break;
         case "text":
         case "box":
+        case "select":
           setActiveTileX(charX);
           setActiveTileY(charY);
           break;
@@ -199,12 +226,24 @@ export default function Main() {
   }
 
   function onClickEditor(event) {
+    if (event.button !== 0) {
+      return;
+    }
+    if (activeTool === "select" && currentPaste) {
+      event.preventDefault();
+      const { charX, charY } = getCharacterPosition(event);
+      replaceWithPaste(charX, charY, currentPaste);
+    }
+  }
+
+  function onMouseDownEditor(event) {
     if (event.button === 0) {
       setMouseIsDown(true);
     }
-    if (activeTool === "box") {
+    if (activeTool === "box" || activeTool === "select") {
       const { charX, charY } = getCharacterPosition(event);
-      setboxPosTLXY([charX, charY]);
+      setActiveToolStartXY([charX, charY]);
+      setActiveToolEndXY(null);
       setActiveTileX(charX);
       setActiveTileY(charY);
       return;
@@ -212,20 +251,124 @@ export default function Main() {
     doEditorAction(event);
   }
 
+  function convertToPasteable(str) {
+    if (!str || typeof str !== "string" || str.length < 1) {
+      return null;
+    }
+    const lines = str.split(/[\r\n]+/),
+      maxLen = Math.max(...lines.map((l) => l.length));
+    for (let i = 0; i < lines.length; i++) {
+      while (lines[i].length < maxLen) {
+        lines[i] += " ";
+      }
+      lines[i] = lines[i].split("");
+    }
+    return lines;
+  }
+
+  function replaceWithPaste(x, y, txt) {
+    const newData = structuredClone(data);
+    for (let newY = 0; newY < txt.length; newY++) {
+      for (let newX = 0; newX < txt[0].length; newX++) {
+        if (newY + y < newData.length && newX + x < newData[0].length) {
+          newData[newY + y][newX + x] = txt[newY][newX];
+        }
+      }
+    }
+    setData(newData);
+  }
+
+  function onCut(event) {
+    event.ascii2retroIsCut = true;
+    return onCopy(event);
+  }
+
+  function onCopy(event) {
+    // Ignore the event if the user is typing in a text input or textarea
+    const targetTag = event.target.tagName;
+    if (targetTag === "INPUT" || targetTag === "TEXTAREA" || event.target.isContentEditable) {
+      return;
+    }
+    event.preventDefault();
+    const modData = structuredClone(data);
+    if (activeTool === "select") {
+      if (activeToolStartXY && activeToolEndXY) {
+        const lines = [],
+          minX = Math.min(activeToolStartXY[0], activeToolEndXY[0]),
+          maxX = Math.max(activeToolStartXY[0], activeToolEndXY[0]),
+          minY = Math.min(activeToolStartXY[1], activeToolEndXY[1]),
+          maxY = Math.max(activeToolStartXY[1], activeToolEndXY[1]);
+
+        data.forEach((row, rowId) => {
+          if (rowId >= minY && rowId <= maxY) {
+            lines.push([]);
+            row.forEach((col, colId) => {
+              if (colId >= minX && colId <= maxX) {
+                lines[lines.length - 1].push(col);
+                modData[rowId][colId] = " ";
+              }
+            });
+          }
+        });
+
+        setCurrentPaste(lines);
+        setActiveToolStartXY(null);
+        setActiveToolEndXY(null);
+
+        if (event.ascii2retroIsCut) {
+          setData(modData);
+        }
+
+        // Put it on the real clipboard too, in case you want to use it outside the app
+        let cbString = lines.map((l) => l.join("")).join("\n");
+        event.clipboardData.setData("text/plain", cbString);
+      }
+    }
+  }
+
+  function onPaste(event) {
+    // Ignore the event if the user is typing in a text input or textarea
+    const targetTag = event.target.tagName;
+    if (targetTag === "INPUT" || targetTag === "TEXTAREA" || event.target.isContentEditable) {
+      return;
+    }
+    event.preventDefault();
+    const txt = convertToPasteable((event.clipboardData || window.clipboardData).getData("text"));
+    if (!txt) {
+      return;
+    }
+    if (activeTool === "text") {
+      replaceWithPaste(activeTileX, activeTileY, txt);
+      return;
+    } else if (activeTool === "select") {
+      setCurrentPaste(txt);
+      setActiveToolStartXY(null);
+      setActiveToolEndXY(null);
+    }
+  }
+
   function onReleaseEditor(event) {
     setMouseIsDown(false);
-    if (boxPosTLXY) {
-      setData(
-        drawBox(
-          data,
-          BOX_STYLES.findIndex((b) => b.name === boxStyle),
-          activeTileX,
-          activeTileY,
-          boxPosTLXY[0],
-          boxPosTLXY[1],
-        ),
-      );
-      setboxPosTLXY(null);
+    if (activeToolStartXY) {
+      if (activeTool === "box") {
+        setData(
+          drawBox(
+            data,
+            BOX_STYLES.findIndex((b) => b.name === boxStyle),
+            activeTileX,
+            activeTileY,
+            activeToolStartXY[0],
+            activeToolStartXY[1],
+          ),
+        );
+        setActiveToolStartXY(null);
+      } else if (activeTool === "select") {
+        const { charX, charY } = getCharacterPosition(event);
+
+        if (typeof charX !== "undefined") {
+          setActiveToolEndXY([charX, charY]);
+        }
+      }
     }
   }
 
@@ -244,7 +387,7 @@ export default function Main() {
         }
         break;
       case "text":
-        if (event.key.length === 1) {
+        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
           writeCharacter(activeTileX, activeTileY, event.key);
           event.preventDefault();
           if (activeTileX + 1 < width) {
@@ -291,6 +434,11 @@ export default function Main() {
           }
           event.preventDefault();
         }
+      case "select":
+        if (event.key === "Escape") {
+          setCurrentPaste(null);
+        }
+        break;
     }
   }
 
@@ -342,6 +490,13 @@ export default function Main() {
   function rebuildTranslations() {
     clearTimeout(translationsDebounce);
     setTranslationsDebounce(setTimeout(rebuildTranslationsInternal, 250));
+  }
+
+  function setActiveTool(value) {
+    setActiveToolData(value);
+    setActiveToolStartXY(null);
+    setActiveToolEndXY(null);
+    setCurrentPaste(null);
   }
 
   function rebuildTranslationsInternal() {
@@ -496,7 +651,8 @@ export default function Main() {
         <article className="editor">
           <div
             className="editor-wrap"
-            onMouseDown={onClickEditor}
+            onClick={onClickEditor}
+            onMouseDown={onMouseDownEditor}
             onContextMenu={(e) => e.preventDefault()}
             onMouseMove={(e) => (mouseIsDown ? doEditorAction(e) : null)}
           >
@@ -505,16 +661,33 @@ export default function Main() {
               <div key={rowId} className="row">
                 {row.map((chr, chrId) => {
                   let isActive = false;
-                  if (activeTool === "text") isActive = rowId === activeTileY && chrId === activeTileX;
-                  if (activeTool === "box" && boxPosTLXY) {
-                    const minX = Math.min(boxPosTLXY[0], activeTileX),
-                      maxX = Math.max(boxPosTLXY[0], activeTileX),
-                      minY = Math.min(boxPosTLXY[1], activeTileY),
-                      maxY = Math.max(boxPosTLXY[1], activeTileY);
+                  if (activeTool === "text") {
+                    isActive = rowId === activeTileY && chrId === activeTileX;
+                  } else if (activeTool === "box" && activeToolStartXY) {
+                    const minX = Math.min(activeToolStartXY[0], activeTileX),
+                      maxX = Math.max(activeToolStartXY[0], activeTileX),
+                      minY = Math.min(activeToolStartXY[1], activeTileY),
+                      maxY = Math.max(activeToolStartXY[1], activeTileY);
 
                     isActive =
                       ((rowId === minY || rowId === maxY) && chrId >= minX && chrId <= maxX) ||
                       ((chrId === minX || chrId === maxX) && rowId >= minY && rowId <= maxY);
+                  } else if (activeTool === "select" && activeToolStartXY) {
+                    // still selecting
+                    const minX = Math.min(
+                        activeToolStartXY[0],
+                        activeTileX,
+                        activeToolEndXY?.[0] ?? Number.MAX_SAFE_INTEGER,
+                      ),
+                      maxX = Math.max(activeToolStartXY[0], activeTileX, activeToolEndXY?.[0] ?? 0),
+                      minY = Math.min(
+                        activeToolStartXY[1],
+                        activeTileY,
+                        activeToolEndXY?.[1] ?? Number.MAX_SAFE_INTEGER,
+                      ),
+                      maxY = Math.max(activeToolStartXY[1], activeTileY, activeToolEndXY?.[1] ?? 0);
+
+                    isActive = chrId >= minX && chrId <= maxX && rowId >= minY && rowId <= maxY;
                   }
                   return (
                     <div key={chrId} className={`character ${isActive ? "active" : ""}`}>
@@ -608,8 +781,21 @@ export default function Main() {
         Created in 2026 by Sarah Parker <br />
         <a href="https://igwgames.com">Homepage</a> &bull;{" "}
         <a href="https://gh.nes.science/ascii2tilemap">Source code</a>
-        <small class="version">Version {pkgJson.version}</small>
+        <small className="version">Version {pkgJson.version}</small>
       </article>
+      <div className="paste-div" id="paste-div" ref={pasteDiv}>
+        <div className="paste-wrap">
+          {currentPaste?.map((row, rowId) => {
+            return (
+              <div className="row">
+                {row.map((col, colId) => {
+                  return <div className="character">{col}</div>;
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </>
   );
 }

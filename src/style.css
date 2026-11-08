@@ -1,13 +1,15 @@
 :root {
   --char-border-color: rgba(158, 158, 158, 0.25);
   --char-size: 24px;
+  --paste-char-offset: -24px;
 }
 
 .project-description {
   margin: 16px auto 32px;
 }
 
-.editor-container {
+.editor-container,
+.paste-div {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -23,11 +25,13 @@
     width: 300px;
   }
 
-  .editor {
+  .editor,
+  .paste-div {
     flex-grow: 1;
   }
 
-  .editor-wrap {
+  .editor-wrap,
+  .paste-wrap {
     background-color: var(--char-border-color);
     padding: 1px;
     width: fit-content;
@@ -193,4 +197,15 @@ small.version {
   position: absolute;
   right: 8px;
   bottom: 8px;
+}
+
+.paste-div {
+  position: absolute;
+  background-color: #000;
+  opacity: 0.6;
+  .paste-wrap {
+    margin-left: calc(var(--paste-char-offset) + 4px);
+    margin-top: calc(var(--paste-char-offset) - 4px);
+  }
+  pointer-events: none;
 }
