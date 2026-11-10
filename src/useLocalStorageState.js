@@ -2,6 +2,17 @@ import { useState } from "react";
 // useState wrapped in localStorage. Pretty simple
 const prefix = "ascii2tilemap.";
 export default function useLocalStorageState(key, defaultVal) {
+  const [val, setVal] = useState(getLocalStorageValueImmediate(key, defaultVal));
+  return [
+    val,
+    (val) => {
+      localStorage.setItem(`${prefix}${key}`, JSON.stringify(val));
+      return setVal(val);
+    },
+  ];
+}
+
+export function getLocalStorageValueImmediate(key, defaultVal) {
   let myValue = defaultVal;
   let lsVal = localStorage.getItem(`${prefix}${key}`);
   if (typeof lsVal === "string") {
@@ -12,13 +23,5 @@ export default function useLocalStorageState(key, defaultVal) {
       console.error("Failed parsing key", key, "from localStorage", e);
     }
   }
-  const [val, setVal] = useState(myValue);
-
-  return [
-    val,
-    (val) => {
-      localStorage.setItem(`${prefix}${key}`, JSON.stringify(val));
-      return setVal(val);
-    },
-  ];
+  return myValue;
 }

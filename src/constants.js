@@ -2,6 +2,7 @@ const DEFAULT_WIDTH = 32,
   DEFAULT_HEIGHT = 30,
   CHAR_SIZE_W_BORDER_PX_X = 26,
   CHAR_SIZE_W_BORDER_PX_Y = 25.5,
+  UNDO_LIMIT = 100,
   TOOL_TYPES = ["draw", "select", "rect", "type"],
   BOX_STYLES = [
     { name: "Default", tl: "┌", tr: "┐", bl: "└", br: "┘", horz: "─", vert: "│" },
@@ -109,4 +110,5 @@ export {
   TOOL_TYPES,
   BOX_STYLES,
   EXTRA_CHAR_TABLE,
+  UNDO_LIMIT,
 };

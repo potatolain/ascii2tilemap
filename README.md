@@ -22,14 +22,25 @@ Enjoy!
 - Console-agnostic - supports any screen size, and output format is customizable to whatever memory size your console uses
 - Simple - can you use a text editor? You can probably figure this out
 - Web-based - nothing to download
+- Undo/redo
+- Plain text copy/paste right into editor
+- Exports to raw raw binary, text, csv, or C! (Need another format? Raise an issue!)
+
+## How to use it
+
+1. Open the tool at https://ascii2tilemap.nes.science
+2. Draw out the shape of your tilemap using ascii and the tools provided
+3. Optionally, set a default offset for ascii characters used in the map to adjust all characters
+4. Use the translations section at the bottom of the tool to override the output value for any character
+5. Use the export button to export the content of your drawing to a format your game can ingest/convert
+
+You may also optionally use the converter shared on the releases page to the right to do the conversion
+at compile time. If you do this, you can just download the default ascii file format the "Save" button downloads.
 
 ## Future wishlist items
 
-- implement select tool with drag, delete
-- Make file util a separate file and binary
-- Support copy/paste?
-- Support undo/redo?
 - Add a Fill tool?
+- More? Raise an issue!
 
 ## File format
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+
 import ToolSelector from "./ToolSelector.js";
 import ExtraCharacterTable from "./ExtaCharacterTable.js";
 import InfoDialog from "./InfoDialog.js";
@@ -11,6 +12,7 @@ import {
   CHAR_SIZE_W_BORDER_PX_Y,
   TOOL_TYPES,
   BOX_STYLES,
+  UNDO_LIMIT,
 } from "./constants.js";
 import { downloadFile } from "./webUtils.js";
 import ResizeDialog from "./ResizeDialog.js";
@@ -105,11 +107,12 @@ function movePasteDiv(event) {
 }
 
 export default function Main() {
+  const defaultData = buildDefaultData();
   const [name, setNameRaw] = useLocalStorageState("name");
   const [nameValid, setNameValid] = useState(true);
   const [width, setWidth] = useLocalStorageState("width", DEFAULT_WIDTH);
   const [height, setHeight] = useLocalStorageState("height", DEFAULT_HEIGHT);
-  const [data, setData] = useLocalStorageState("drawingdata", buildDefaultData());
+  const [data, setDataInternal] = useLocalStorageState("drawingdata", defaultData);
   const [outputSize, setOutputSize] = useLocalStorageState("outputSize", 8);
   const [asciiOffset, setAsciiOffset] = useLocalStorageState("asciiOffset", "0");
   const [activeTool, setActiveToolData] = useLocalStorageState("activeTool", TOOL_TYPES[0]);
@@ -126,6 +129,8 @@ export default function Main() {
   const [showResizeDialog, setShowResizeDialog] = useState(false);
   const [currentDialog, setCurrentDialog] = useState({});
   const [currentPaste, setCurrentPaste] = useState(null);
+  const [undoHistory, setUndoHistory] = useState([{ data }]);
+  const [undoPosition, setUndoPosition] = useState(0);
 
   const pasteDiv = useRef(null);
 
@@ -137,6 +142,7 @@ export default function Main() {
     window.addEventListener("copy", onCopy);
     window.addEventListener("paste", onPaste);
     window.addEventListener("mousemove", movePasteDiv);
+
     return () => {
       window.removeEventListener("mouseup", onReleaseEditor);
       window.removeEventListener("keydown", onKeyDown);
@@ -158,6 +164,41 @@ export default function Main() {
 
   function hideDialog() {
     setCurrentDialog({});
+  }
+
+  // Wrapper to store history, so we can restore it as needed.
+  function setData(newData) {
+    let newUndoHistory;
+    if (undoPosition !== undoHistory.length - 1) {
+      newUndoHistory = undoHistory.slice(0, undoPosition + 1);
+    } else {
+      newUndoHistory = [...undoHistory];
+    }
+    newUndoHistory.push({ data: newData });
+    if (newUndoHistory.length > UNDO_LIMIT) {
+      newUndoHistory.shift();
+    }
+    setUndoHistory(newUndoHistory);
+    setUndoPosition(newUndoHistory.length - 1);
+    setDataInternal(newData);
+  }
+
+  function undoData() {
+    if (undoPosition > 0) {
+      setUndoPosition(undoPosition - 1);
+    } else {
+      return;
+    }
+    setDataInternal(undoHistory[undoPosition - 1].data);
+  }
+
+  function redoData() {
+    if (undoPosition < undoHistory.length - 1) {
+      setUndoPosition(undoPosition + 1);
+    } else {
+      return;
+    }
+    setDataInternal(undoHistory[undoPosition + 1].data);
   }
 
   function clearData() {
@@ -379,9 +420,27 @@ export default function Main() {
       return;
     }
 
+    // Global shortcuts
+    if (event.metaKey || event.ctrlKey) {
+      switch (event.key) {
+        case "Z":
+          redoData();
+          event.preventDefault();
+          break;
+        case "z":
+          undoData();
+          event.preventDefault();
+          break;
+        case "y":
+          redoData();
+          event.preventDefault();
+          break;
+      }
+    }
+
     switch (activeTool) {
       case "draw":
-        if (event.key.length === 1) {
+        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
           setActiveDrawCharacter(event.key);
           event.preventDefault();
         }
