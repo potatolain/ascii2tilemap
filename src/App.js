@@ -4,7 +4,15 @@ import ToolSelector from "./ToolSelector.js";
 import ExtraCharacterTable from "./ExtaCharacterTable.js";
 import InfoDialog from "./InfoDialog.js";
 import useLocalStorageState from "./useLocalStorageState.js";
-import { saveToText, loadFromText, exportAs, parseTextToBinary, knownExportTypes, exportNames } from "./fileUtils.js";
+import {
+  saveToText,
+  loadFromText,
+  exportAs,
+  parseTextToBinary,
+  knownExportTypes,
+  exportNames,
+  slugify,
+} from "./fileUtils.js";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_WIDTH,
@@ -558,7 +566,7 @@ export default function Main() {
     setCurrentPaste(null);
   }
 
-  function rebuildTranslationsInternal() {
+  function rebuildTranslationsInternal(wipeMissingTranslations = false) {
     const usedChars = {},
       newTranslations = structuredClone(translations);
     data.forEach((row) => {
@@ -573,9 +581,30 @@ export default function Main() {
         newTranslations[char] = null;
       }
     });
+    if (wipeMissingTranslations) {
+      Object.keys(newTranslations).forEach((char) => {
+        if (!(char in usedChars)) {
+          delete newTranslations[char];
+          hasUpdated = true;
+        }
+      });
+    }
     if (hasUpdated) {
       setTranslations(newTranslations);
     }
+  }
+
+  function pruneUnusedTranslations() {
+    const content = (
+        <p>
+          This will remove any translations for characters that do not currently appear in your ascii. Their translation
+          values will not return if they are re-added. Are you sure you want to continue?
+        </p>
+      ),
+      onOk = () => {
+        rebuildTranslationsInternal(true);
+      };
+    showDialog("Are you sure?", content, onOk);
   }
 
   function onClickExport(expType) {
@@ -620,7 +649,7 @@ export default function Main() {
         extension = "txt";
         break;
     }
-    downloadFile(`${name}.${extension}`, contentType, exportRes);
+    downloadFile(`${slugify(name)}.${extension}`, contentType, exportRes);
   }
 
   function validateAsciiOffset(event) {
@@ -762,6 +791,11 @@ export default function Main() {
       <div className="container">
         <article className="translations">
           <h3>Translations</h3>
+          <div className="btn-float">
+            <button onClick={pruneUnusedTranslations} className="secondary">
+              Prune unused translations
+            </button>
+          </div>
           <fieldset>
             <legend data-tooltip="This is the size in bytes of each output value in the exports. Mostly used for binary formats.">
               Binary File Output Size
@@ -827,7 +861,7 @@ export default function Main() {
                     <input
                       id={`translation-char-${character}`}
                       value={translations[character] ?? ""}
-                      placeholder={`Default (${character.charCodeAt(0) + asciiOffsetParsed})`}
+                      placeholder={`Default (0x${(character.charCodeAt(0) + asciiOffsetParsed).toString(16)})`}
                       onChange={(event) => setTranslation(character, event.target.value)}
                     />
                   </fieldset>
